@@ -22,14 +22,14 @@
 //#define ST7920_BANNER_TEXT "LCD12864 Simulator"
 
 // Run Marlin Mode fullscreen. Not recommended for TFT24.
-//#define ST7920_FULLSCREEN
+#define ST7920_FULLSCREEN
 
 //===========================================================================
 //============================ TFT Mode Settings ============================
 //===========================================================================
 
 // Show BTT bootscreen when starting up
-#define SHOW_BTT_BOOTSCREEN
+//#define SHOW_BTT_BOOTSCREEN
 
 // TFT mode color
 #define TITLE_BACKGROUND_COLOR      BLACK  // Title background color // 0xD928
@@ -44,8 +44,8 @@
 #define FAN_NUM      1    // set in 1~6
 
 //                       PLA      PETG       ABS
-#define PREHEAT_BED      {60,      70,       100}
-#define PREHEAT_HOTEND   {200,     250,      230}
+#define PREHEAT_BED      {54,      64,       100}
+#define PREHEAT_HOTEND   {200,     236,      230}
 #define PREHEAT_TEXT     {"PLA",  "PETG",   "ABS"}
 
 #define HEAT_MAX_TEMP    {150,    275,       275,       275,       275,       275,       275}    //max temperature can be set
@@ -64,9 +64,9 @@
 #define SPEED_ID         {"Sp.", "Fr."}
 
 // Default move speed mm/min
-#define DEFAULT_SPEED_MOVE      3000
-#define SPEED_MOVE_SLOW         1000
-#define SPEED_MOVE_FAST         5000
+#define DEFAULT_SPEED_MOVE      3600
+#define SPEED_MOVE_SLOW         1200
+#define SPEED_MOVE_FAST         5520
 // Extrude speed mm/min
 #define EXTRUDE_SLOW_SPEED      60
 #define EXTRUDE_NORMAL_SPEED    600
@@ -137,7 +137,7 @@
 
 // Enable Unified Move Menu
 // Move, Home, Extrude, ABL at one Place and bring Gcode Menu on Home Menu
-//#define UNIFIED_MENU
+#define UNIFIED_MENU
 
 /**
  * Enable list mode in Files menu and settings menu
@@ -201,8 +201,8 @@
 #define CUSTOM_2_GCODE "M21\n"
 #define CUSTOM_3_LABEL "Release Sd Card"
 #define CUSTOM_3_GCODE "M22\n"
-//#define CUSTOM_4_LABEL "Custom4"
-//#define CUSTOM_4_GCODE "M105\n"
+#define CUSTOM_4_LABEL "Save EEPROM"
+#define CUSTOM_4_GCODE "M500\n"
 //#define CUSTOM_5_LABEL "Custom5"
 //#define CUSTOM_5_GCODE "M105\n"
 //#define CUSTOM_6_LABEL "Custom6"
