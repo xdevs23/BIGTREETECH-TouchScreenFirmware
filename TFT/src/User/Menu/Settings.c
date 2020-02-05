@@ -13,7 +13,7 @@ void infoSettingsReset(void)
   infoSettings.rotate_ui = 0;
   infoSettings.bg_color = ST7920_BKCOLOR;
   infoSettings.font_color = ST7920_FNCOLOR;
-  infoSettings.silent = 0;
+  infoSettings.silent = 1;
   infoSettings.auto_off = 0;
   infoSettings.terminalACK = 0;
   infoSettings.invert_yaxis = 0;
