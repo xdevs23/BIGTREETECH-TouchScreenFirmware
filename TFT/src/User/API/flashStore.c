@@ -68,6 +68,8 @@ bool readStoredPara(void)
     infoSettings.invert_yaxis     = byteToWord(data + (index += 4), 4);
     infoSettings.move_speed       = byteToWord(data + (index += 4), 4);
     infoSettings.invert_zaxis     = byteToWord(data + (index += 4), 4);
+    infoSettings.auto_bed_leveling
+                                  = byteToWord(data + (index += 4), 4);
   }
   
   return paraExist;

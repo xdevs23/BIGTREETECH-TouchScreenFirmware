@@ -152,5 +152,6 @@
     #define FR_MOVE_SPEED           "Vitesse de déplacement (X Y Z)"
     #define FR_KNOB_LED             "Rotary Knob LED"
     #define FR_M0_PAUSE             "Paused by M0 command"
+    #define FR_AUTO_BED_LEVEL       "Auto bed leveling"
 
 #endif

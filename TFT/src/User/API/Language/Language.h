@@ -178,6 +178,7 @@ enum
   LABEL_MOVE_SPEED,
   LABEL_KNOB_LED,
   LABEL_M0_PAUSE,
+  LABEL_AUTO_BED_LEVEL,
 
   //add new keywords above this line only
   //keep the following always at the end of this list

@@ -152,5 +152,6 @@
     #define PL_MOVE_SPEED           "Move speed(X Y Z)"
     #define PL_KNOB_LED             "Rotary Knob LED"
     #define PL_M0_PAUSE             "Paused by M0 command"
+    #define PL_AUTO_BED_LEVEL       "Auto bed leveling"
 
 #endif

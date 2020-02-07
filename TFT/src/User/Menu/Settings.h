@@ -26,6 +26,7 @@ typedef struct
   uint8_t  move_speed;
   uint32_t led_color;
   uint8_t  invert_zaxis;
+  uint8_t  auto_bed_leveling;
 }SETTINGS;
 
 
