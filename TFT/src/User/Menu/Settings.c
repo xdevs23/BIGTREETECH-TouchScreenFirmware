@@ -20,7 +20,7 @@ void infoSettingsReset(void)
   infoSettings.move_speed = 0;
   infoSettings.led_color = LED_OFF;
   infoSettings.invert_zaxis = 0;
-  infoSettings.auto_bed_leveling = AUTO_BED_LEVEL_DEFAULT_VALUE;
+  
 }
 
 // Version infomation

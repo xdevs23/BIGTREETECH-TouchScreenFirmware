@@ -55,12 +55,12 @@ void menuMain(void)
         case KEY_ICON_1: infoMenu.menu[++infoMenu.cur] = menuMove;      break;
         case KEY_ICON_2: infoMenu.menu[++infoMenu.cur] = menuHome;      break;
         case KEY_ICON_3:
-          if (infoSettings.auto_bed_leveling) {
+          #ifdef AUTO_BED_LEVELING
             infoMenu.menu[++infoMenu.cur] = menuAutoLeveling;
-          } else {
+          #else
             infoMenu.menu[++infoMenu.cur] = menuManualLeveling;
-          }
-          break;
+          #endif
+          break;      
         case KEY_ICON_4: infoMenu.menu[++infoMenu.cur] = menuExtrude;   break;
         case KEY_ICON_5: infoMenu.menu[++infoMenu.cur] = menuSettings;  break;
         case KEY_ICON_7: infoMenu.cur--;        break;

@@ -152,6 +152,5 @@
     #define IT_MOVE_SPEED           "Move speed(X Y Z)"
     #define IT_KNOB_LED             "Rotary Knob LED"
     #define IT_M0_PAUSE             "Paused by M0 command"
-    #define IT_AUTO_BED_LEVEL       "Auto bed leveling"
-
+    
 #endif

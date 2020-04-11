@@ -239,7 +239,6 @@
                                         };
 
     #endif
-
 //
 //add key number index of the items
 //
@@ -258,7 +257,6 @@
       #ifdef LED_color_PIN
       SKEY_KNOB,
       #endif
-      SKEY_ABL,
       SKEY_COUNT //keep this always at the end
     }SKEY_LIST; 
     
@@ -282,7 +280,7 @@
       #ifdef LED_color_PIN
       {ICONCHAR_BLANK,      LIST_CUSTOMVALUE,   LABEL_KNOB_LED,           LABEL_OFF       },
       #endif
-      {ICONCHAR_TOGGLE_ON,  LIST_TOGGLE,        LABEL_AUTO_BED_LEVEL,     LABEL_BACKGROUND},
+      
     };
 
 //
@@ -343,18 +341,6 @@
         ws2812_send_DAT(led_color[infoSettings.led_color]);
         break;
         #endif
-
-        case SKEY_ABL:
-        infoSettings.auto_bed_leveling = (infoSettings.auto_bed_leveling + 1) % 2;
-        settingPage[item_index].icon = toggleitem[infoSettings.auto_bed_leveling];
-        featureSettingsItems.items[key_val].icon = toggleitem[infoSettings.auto_bed_leveling];
-        #ifdef AUTO_SAVE_LOAD_LEVELING_VALUE
-        if (infoSettings.auto_bed_leveling) {
-          // Load bed leveling value
-          storeCmd("M420 S1\n");
-        }
-        #endif
-        break;
 
       default:
         break;
@@ -420,11 +406,6 @@
             featureSettingsItems.items[i] = settingPage[item_index];
             break;
           #endif
-
-          case SKEY_ABL:
-            settingPage[item_index].icon = toggleitem[infoSettings.auto_bed_leveling];
-            featureSettingsItems.items[i] = settingPage[item_index];
-            break;
 
           default:
             settingPage[item_index].icon = ICONCHAR_BACKGROUND;

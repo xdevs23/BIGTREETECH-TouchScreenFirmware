@@ -152,6 +152,5 @@
     #define CZ_MOVE_SPEED           "Move speed(X Y Z)"
     #define CZ_KNOB_LED             "Rotary Knob LED"
     #define CZ_M0_PAUSE             "Paused by M0 command"
-    #define CZ_AUTO_BED_LEVEL       "Auto bed leveling"
 
 #endif

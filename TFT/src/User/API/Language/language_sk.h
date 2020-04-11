@@ -153,6 +153,5 @@
     #define SK_MOVE_SPEED           "Move speed(X Y Z)"
     #define SK_KNOB_LED             "Rotary Knob LED"
     #define SK_M0_PAUSE             "Paused by M0 command"
-    #define SK_AUTO_BED_LEVEL       "Auto bed leveling"
 
 #endif
