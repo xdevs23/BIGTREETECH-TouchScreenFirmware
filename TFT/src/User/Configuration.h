@@ -143,7 +143,7 @@
  * Toast notification duration (in ms)
  * Set the duration for displaying toast notification on top of the screen
  */
-#define TOAST_DURATION 3000
+#define TOAST_DURATION 2600
 
 /**
  * Notification style for ACK messages
