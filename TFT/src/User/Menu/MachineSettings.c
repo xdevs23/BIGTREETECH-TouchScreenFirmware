@@ -5,7 +5,7 @@ uint8_t gcode_num;
 uint8_t gc_page_count;
 uint8_t gc_cur_page = 0;
 
-CUSTOM_GCODES * customcodes = NULL;
+CUSTOM_GCODES *customcodes = NULL;
 
 LISTITEMS customItems = {
 // title
@@ -30,7 +30,8 @@ void loaditemsCustomGcode()
   for (uint32_t i = 0; i < LISTITEM_PER_PAGE; i++)
   {
     uint32_t item_index = gc_cur_page*LISTITEM_PER_PAGE + i;
-    if (item_index < gcode_num){
+    if (item_index < gcode_num)
+    {
       customItems.items[i].icon = ICONCHAR_CODE;
       customItems.items[i].titlelabel.index = LABEL_DYNAMIC;
       customItems.items[i].titlelabel.address = customcodes->name[item_index];
@@ -48,11 +49,13 @@ void loaditemsCustomGcode()
   }
   else
   {
-    if(gc_cur_page == 0){
+    if(gc_cur_page == 0)
+    {
       customItems.items[5].icon = ICONCHAR_BACKGROUND;
       customItems.items[6].icon = ICONCHAR_PAGEDOWN;
     }
-    else if(gc_cur_page == (gc_page_count-1)){
+    else if(gc_cur_page == (gc_page_count-1))
+    {
       customItems.items[5].icon = ICONCHAR_PAGEUP;
       customItems.items[6].icon = ICONCHAR_BACKGROUND;
     }
@@ -104,6 +107,7 @@ void menuCustom(void)
         }
       }
       break;
+
     case KEY_ICON_6:
       if (gc_page_count > 1)
       {
@@ -115,10 +119,12 @@ void menuCustom(void)
         }
       }
       break;
+
     case KEY_ICON_7:
       gc_cur_page = 0;
       infoMenu.cur--;
       break;
+
     default:
       break;
     }
@@ -129,21 +135,20 @@ void menuCustom(void)
 void menuRGBSettings(void)
 {
   MENUITEMS RGBItems = {
-  // title
-  LABEL_RGB_SETTINGS,
-  // icon                       label
-   {{ICON_RGB_RED,              LABEL_RED},
-    {ICON_RGB_GREEN,            LABEL_GREEN},
-    {ICON_RGB_BLUE,             LABEL_BLUE},
-    {ICON_RGB_WHITE,            LABEL_WHITE},
-    {ICON_RGB_OFF,              LABEL_OFF},
-    {ICON_BACKGROUND,           LABEL_BACKGROUND},
-    {ICON_BACKGROUND,           LABEL_BACKGROUND},
-    {ICON_BACK,                 LABEL_BACK},}
+    // title
+    LABEL_RGB_SETTINGS,
+    // icon                         label
+    {{ICON_RGB_RED,                 LABEL_RED},
+     {ICON_RGB_GREEN,               LABEL_GREEN},
+     {ICON_RGB_BLUE,                LABEL_BLUE},
+     {ICON_RGB_WHITE,               LABEL_WHITE},
+     {ICON_RGB_OFF,                 LABEL_OFF},
+     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_BACK,                    LABEL_BACK},}
   };
 
   KEY_VALUES key_num = KEY_IDLE;
-
   menuDrawPage(&RGBItems);
 
   while(infoMenu.menu[infoMenu.cur] == menuRGBSettings)
@@ -151,38 +156,39 @@ void menuRGBSettings(void)
     key_num = menuKeyGetValue();
     switch(key_num)
     {
-      case KEY_ICON_0:  //Red
-        storeCmd("M150 R255 U0 B0 P255\n");
-        break;
+    case KEY_ICON_0: //Red
+      storeCmd("M150 R255 U0 B0 P255\n");
+      break;
 
-      case KEY_ICON_1:  //Green
-        storeCmd("M150 R0 U255 B0 P255\n");
-        break;
+    case KEY_ICON_1: //Green
+      storeCmd("M150 R0 U255 B0 P255\n");
+      break;
 
-      case KEY_ICON_2:  //Blue
-        storeCmd("M150 R0 U0 B255 P255\n");
-        break;
+    case KEY_ICON_2: //Blue
+      storeCmd("M150 R0 U0 B255 P255\n");
+      break;
 
-      case KEY_ICON_3:  //White
-        storeCmd("M150 R255 U255 B255 P255\n");
-        break;
+    case KEY_ICON_3: //White
+      storeCmd("M150 R255 U255 B255 P255\n");
+      break;
 
-      case KEY_ICON_4:  //Turn Off
-        storeCmd("M150 R0 U0 B0 P0\n");
-        break;
+    case KEY_ICON_4: //Turn Off
+      storeCmd("M150 R0 U0 B0 P0\n");
+      break;
 
-      case KEY_ICON_7:
-        infoMenu.cur--;
-        break;
+    case KEY_ICON_7:
+      infoMenu.cur--;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
     loopProcess();
   }
 }
 
 #if QUICK_EEPROM_BUTTON == 1
+
 void menuEepromSettings(void)
 {
   // 1 title, ITEM_PER_PAGE items (icon + label)
@@ -209,39 +215,46 @@ void menuEepromSettings(void)
     key_num = menuKeyGetValue();
     switch(key_num)
     {
-      case KEY_ICON_0:
-        // save to EEPROM
-        if (infoMachineSettings.EEPROM == 1)
-          setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_SAVE_INFO, LABEL_CONFIRM, LABEL_CANCEL);
+    case KEY_ICON_0:
+      // save to EEPROM
+      if (infoMachineSettings.EEPROM == 1)
+      {
+        setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_SAVE_INFO, LABEL_CONFIRM, LABEL_CANCEL);
         showDialog(DIALOG_TYPE_QUESTION, saveEepromSettings, NULL, NULL);
-        break;
+      }
+      break;
 
-      case KEY_ICON_1:
-        // restore from EEPROM
-        if (infoMachineSettings.EEPROM == 1)
-          setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_RESTORE_INFO, LABEL_CONFIRM, LABEL_CANCEL);
-          showDialog(DIALOG_TYPE_QUESTION, restoreEepromSettings, NULL, NULL);
-        break;
+    case KEY_ICON_1:
+      // restore from EEPROM
+      if (infoMachineSettings.EEPROM == 1)
+      {
+        setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_RESTORE_INFO, LABEL_CONFIRM, LABEL_CANCEL);
+        showDialog(DIALOG_TYPE_QUESTION, restoreEepromSettings, NULL, NULL);
+      }
+      break;
 
-      case KEY_ICON_2:
-        // reset EEPROM
-        if (infoMachineSettings.EEPROM == 1)
-          setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_RESET_INFO, LABEL_CONFIRM, LABEL_CANCEL);
-          showDialog(DIALOG_TYPE_QUESTION, resetEepromSettings, NULL, NULL);
-        break;
+    case KEY_ICON_2:
+      // reset EEPROM
+      if (infoMachineSettings.EEPROM == 1)
+      {
+        setDialogText(eepromSettingsItems.title.index, LABEL_EEPROM_RESET_INFO, LABEL_CONFIRM, LABEL_CANCEL);
+        showDialog(DIALOG_TYPE_QUESTION, resetEepromSettings, NULL, NULL);
+      }
+      break;
 
-      case KEY_ICON_7:
-        infoMenu.cur--;
-        break;
+    case KEY_ICON_7:
+      infoMenu.cur--;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
 
     loopProcess();
   }
 }
-#endif
+
+#endif // QUICK_EEPROM_BUTTON
 
 void menuMachineSettings(void)
 {
@@ -255,17 +268,20 @@ void menuMachineSettings(void)
      {ICON_CUSTOM,                  LABEL_CUSTOM},
      {ICON_RGB_SETTINGS,            LABEL_RGB_SETTINGS},
      {ICON_TUNING,                  LABEL_TUNING},
-#if QUICK_EEPROM_BUTTON == 1
+  #if QUICK_EEPROM_BUTTON == 1
      {ICON_EEPROM_SAVE,             LABEL_EEPROM_SETTINGS},
-#else
+  #else
      {ICON_BACKGROUND,              LABEL_BACKGROUND},
-#endif
+  #endif
      {ICON_BACKGROUND,              LABEL_BACKGROUND},
      {ICON_BACK,                    LABEL_BACK}}
   };
 
-  KEY_VALUES key_num = KEY_IDLE;
+  const ITEM itemCaseLight = {ICON_CASE_LIGHT, LABEL_CASE_LIGHT};
+  if (infoMachineSettings.caseLightsBrightness == ENABLED)
+    machineSettingsItems.items[KEY_ICON_6] = itemCaseLight;
 
+  KEY_VALUES key_num = KEY_IDLE;
   menuDrawPage(&machineSettingsItems);
 
   while(infoMenu.menu[infoMenu.cur] == menuMachineSettings)
@@ -273,38 +289,42 @@ void menuMachineSettings(void)
     key_num = menuKeyGetValue();
     switch(key_num)
     {
-      case KEY_ICON_0:
-        infoMenu.menu[++infoMenu.cur] = menuParameterSettings;
-        break;
+    case KEY_ICON_0:
+      infoMenu.menu[++infoMenu.cur] = menuParameterSettings;
+      break;
 
-      case KEY_ICON_1:
-        infoMenu.menu[++infoMenu.cur] = menuSendGcode;
-        break;
+    case KEY_ICON_1:
+      infoMenu.menu[++infoMenu.cur] = menuSendGcode;
+      break;
 
-      case KEY_ICON_2:
-        infoMenu.menu[++infoMenu.cur] = menuCustom;
-        break;
+    case KEY_ICON_2:
+      infoMenu.menu[++infoMenu.cur] = menuCustom;
+      break;
 
-      case KEY_ICON_3:
-        infoMenu.menu[++infoMenu.cur] = menuRGBSettings;
-        break;
+    case KEY_ICON_3:
+      infoMenu.menu[++infoMenu.cur] = menuRGBSettings;
+      break;
 
-      case KEY_ICON_4:
-        infoMenu.menu[++infoMenu.cur] = menuTuning;
-        break;
+    case KEY_ICON_4:
+      infoMenu.menu[++infoMenu.cur] = menuTuning;
+      break;
 
-#if QUICK_EEPROM_BUTTON == 1
+    #if QUICK_EEPROM_BUTTON == 1
       case KEY_ICON_5:
         infoMenu.menu[++infoMenu.cur] = menuEepromSettings;
         break;
-#endif
+    #endif
+    case KEY_ICON_6:
+      if (infoMachineSettings.caseLightsBrightness == ENABLED)
+        infoMenu.menu[++infoMenu.cur] = menuCaseLight;
+      break;
 
-      case KEY_ICON_7:
-        infoMenu.cur--;
-        break;
+    case KEY_ICON_7:
+      infoMenu.cur--;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
     loopProcess();
   }

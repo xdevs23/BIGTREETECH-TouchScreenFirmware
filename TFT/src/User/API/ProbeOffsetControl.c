@@ -4,74 +4,86 @@
 static float z_offset_value = PROBE_OFFSET_DEFAULT_VALUE;
 static bool probe_offset_enabled = false;
 
-/* Enable probe offset */
-void probeOffsetEnable(void)
+// Enable probe offset
+void probeOffsetEnable(bool skipZOffset)
 {
   probe_offset_enabled = true;
 
+  probeHeightEnable();  // temporary disable software endstops
+
   // Z offset gcode sequence start
-  mustStoreCmd("M211 S0\n");                               // disable Software Endstop to move nozzle minus Zero (Z0) if necessary
-  mustStoreCmd("G28\n");                                   // home printer
-  mustStoreCmd("G91\n");                                   // set relative position mode
-  mustStoreCmd("G1 X%.2f Y%.2f\n",
-    getParameter(P_PROBE_OFFSET, X_STEPPER),
-    getParameter(P_PROBE_OFFSET, Y_STEPPER));              // move nozzle to XY probing point
-  mustStoreCmd("G90\n");                                   // set absolute position mode
-  mustStoreCmd("G1 Z0 F%d\n",                              // move nozzle to Z0 absolute point and set feedrate
-    infoSettings.axis_speed[infoSettings.move_speed]);
-  mustStoreCmd("G91\n");                                   // set relative position mode
+  mustStoreCmd("G28\n");  // home printer
+  probeHeightStop();      // raise nozzle
+
+  if (infoSettings.xy_offset_probing)  // if HW allows nozzle to reach XY probing point
+  {
+    probeHeightStop();  // raise nozzle
+
+    mustStoreCmd("G91\n");  // set relative position mode
+    mustStoreCmd("G1 X%.2f Y%.2f F%d\n",
+                 getParameter(P_PROBE_OFFSET, X_STEPPER),
+                 getParameter(P_PROBE_OFFSET, Y_STEPPER),
+                 infoSettings.level_feedrate[FEEDRATE_XY]);  // move nozzle to XY probing point and set feedrate
+  }
+  else
+  {
+    mustStoreCmd("G1 F%d\n", infoSettings.level_feedrate[FEEDRATE_XY]);  // set feedrate
+  }
+
+  if (!skipZOffset)
+  {
+    probeHeightStart(0.0f);  // lower nozzle to absolute Z0 point
+  }
+  else
+  {
+    probeHeightStart(-probeOffsetGetValue());  // lower nozzle to probing Z0 point
+    probeOffsetSetValue(0.0f);                 // reset Z offset in order probing Z0 matches absolute Z0 point
+  }
 }
 
-/* Disable probe offset */
+// Disable probe offset
 void probeOffsetDisable(void)
 {
   probe_offset_enabled = false;
 
   // Z offset gcode sequence stop
-  mustStoreCmd("G28\n");                                   // home printer
-  mustStoreCmd("G91\n");                                   // set relative position mode
-  mustStoreCmd("G1 Z%.2f\n", infoSettings.pause_z_raise ); // raise Z
-  mustStoreCmd("G90\n");                                   // set absolute position mode
-  mustStoreCmd("M211 S1\n");                               // enable Software Endstop
+  mustStoreCmd("G28\n");  // home printer
+  probeHeightStop();      // raise nozzle
+  probeHeightDisable();   // restore original software endstops state
 }
 
-/* Get probe offset status */
+// Get probe offset status
 bool probeOffsetGetStatus(void)
 {
   return probe_offset_enabled;
 }
 
-/* Set Z offset value */
+// Set Z offset value
 float probeOffsetSetValue(float value)
 {
   mustStoreCmd("M851 Z%.2f\n", value);
-
   z_offset_value = value;
-
   return z_offset_value;
 }
 
-/* Get current Z offset value */
+// Get current Z offset value
 float probeOffsetGetValue(void)
 {
   z_offset_value = getParameter(P_PROBE_OFFSET, Z_STEPPER);
-
   return z_offset_value;
 }
 
-/* Reset Z offset value to default value */
-float probeOffsetResetValue()
+// Reset Z offset value to default value
+float probeOffsetResetValue(void)
 {
-  if (z_offset_value == PROBE_OFFSET_DEFAULT_VALUE)        // if already default value, nothing to do
+  if (z_offset_value == PROBE_OFFSET_DEFAULT_VALUE)  // if already default value, nothing to do
     return z_offset_value;
 
   float unit = z_offset_value - PROBE_OFFSET_DEFAULT_VALUE;
 
-  mustStoreCmd("M851 Z%.2f\n", PROBE_OFFSET_DEFAULT_VALUE);// set the Z offset value
-  mustStoreCmd("G1 Z%.2f\n", -unit);                       // move the nozzle
-
   z_offset_value = PROBE_OFFSET_DEFAULT_VALUE;
-
+  mustStoreCmd("M851 Z%.2f\n", z_offset_value);  // set Z offset value
+  mustStoreCmd("G1 Z%.2f\n", -unit);             // move nozzle
   return z_offset_value;
 }
 
@@ -83,11 +95,9 @@ float probeOffsetDecreaseValue(float unit)
     float diff = z_offset_value - PROBE_OFFSET_MIN_VALUE;
 
     unit = (diff > unit) ? unit : diff;
-
-    mustStoreCmd("M851 Z%.2f\n", z_offset_value - unit);   // set the Z offset value
-    mustStoreCmd("G1 Z%.2f\n", -unit);                     // move the nozzle
-
     z_offset_value -= unit;
+    mustStoreCmd("M851 Z%.2f\n", z_offset_value);  // set Z offset value
+    mustStoreCmd("G1 Z%.2f\n", -unit);             // move nozzle
   }
 
   return z_offset_value;
@@ -101,30 +111,23 @@ float probeOffsetIncreaseValue(float unit)
     float diff = PROBE_OFFSET_MAX_VALUE - z_offset_value;
 
     unit = (diff > unit) ? unit : diff;
-
-    mustStoreCmd("M851 Z%.2f\n", z_offset_value + unit);   // set the Z offset value
-    mustStoreCmd("G1 Z%.2f\n", unit);                      // move the nozzle
-
     z_offset_value += unit;
+    mustStoreCmd("M851 Z%.2f\n", z_offset_value);  // set Z offset value
+    mustStoreCmd("G1 Z%.2f\n", unit);              // move nozzle
   }
 
   return z_offset_value;
 }
 
 // Update Z offset value by encoder
-float probeOffsetUpdateValueByEncoder(float unit)
+float probeOffsetUpdateValueByEncoder(float unit, int8_t direction)
 {
-#if LCD_ENCODER_SUPPORT
-  if (encoderPosition)
-  {
-    float overall_unit = (encoderPosition < 0.0f) ? (-1 * unit * encoderPosition) : (unit * encoderPosition);          // always positive unit
+  float overall_unit = (direction > 0) ? (direction * unit) : (-direction * unit);  // always positive unit
 
-    if (encoderPosition < 0.0)                             // if negative encoder value, decrease the value. Otherwise increase the value
-      probeOffsetDecreaseValue(overall_unit);
-    else
-      probeOffsetIncreaseValue(overall_unit);
-  }
-#endif
+  if (direction < 0)  // if negative encoder value, decrease the value. Otherwise increase the value
+    probeOffsetDecreaseValue(overall_unit);
+  else
+    probeOffsetIncreaseValue(overall_unit);
 
   return z_offset_value;
 }

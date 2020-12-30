@@ -1,6 +1,6 @@
-#include "LCD_Encoder.h"
 #include "GPIO_Init.h"
 #include "includes.h"
+#include "LCD_Encoder.h"
 
 #if LCD_ENCODER_SUPPORT
 
@@ -25,7 +25,7 @@ void HW_EncoderInit(void)
   void HW_EncActiveSignalInit(void)
   {
     GPIO_InitSet(LCD_ENC_EN_PIN, MGPIO_MODE_OUT_PP, 0);
-    setEncActiveSignal(1);
+    setEncActiveSignal(0);
   }
 
   void setEncActiveSignal(uint8_t status)
@@ -113,7 +113,8 @@ void loopCheckEncoderSteps(void)
   #define encrot3 1
 
   // Manage encoder rotation
-  #define ENCODER_SPIN(_E1, _E2) switch (lastEncoderBits) { case _E1: encoderDiff += encoderDirection; break; case _E2: encoderDiff -= encoderDirection; }
+  #define ENCODER_SPIN(_E1, _E2) switch (lastEncoderBits) { case _E1: encoderDiff += encoderDirection; break; \
+                                                            case _E2: encoderDiff -= encoderDirection; }
 
   if (buttons != lastEncoderBits)
   {

@@ -1,7 +1,7 @@
 #include "BedLeveling.h"
 #include "includes.h"
 
-void blUpdateState(MENUITEMS *menu)
+static inline void blUpdateState(MENUITEMS *menu)
 {
   if (getParameter(P_ABL_STATE, 0) == ENABLED)
   {
@@ -23,7 +23,7 @@ void menuBedLeveling(void)
     LABEL_ABL_SETTINGS,
     // icon                         label
     {{ICON_LEVELING,                LABEL_ABL},
-     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_LEVELING,                LABEL_MESH_EDITOR},
      {ICON_BACKGROUND,              LABEL_BACKGROUND},
      {ICON_BACKGROUND,              LABEL_BACKGROUND},
      {ICON_PROBE_OFFSET,            LABEL_Z_OFFSET},
@@ -81,31 +81,30 @@ void menuBedLeveling(void)
         infoMenu.menu[++infoMenu.cur] = menuBL;
         break;
 
+      case KEY_ICON_1:
+        infoMenu.menu[++infoMenu.cur] = menuMeshEditor;
+        break;
+
       case KEY_ICON_4:
         storeCmd("M851\n");
         infoMenu.menu[++infoMenu.cur] = menuProbeOffset;
         break;
 
       case KEY_ICON_5:
-        {
-          char tempstr[30];
-          sprintf(tempstr, "%Min:%.2f | Max:%.2f", Z_FADE_MIN_VALUE, Z_FADE_MAX_VALUE);
-          float val = numPadFloat((u8 *) tempstr, getParameter(P_ABL_STATE, 1), 0.0f, false);
-          storeCmd("M420 Z%.2f\n", NOBEYOND(Z_FADE_MIN_VALUE, val, Z_FADE_MAX_VALUE));
-
-          menuDrawPage(&bedLevelingItems);
-        }
+      {
+        char tempstr[30];
+        sprintf(tempstr, "%Min:%.2f | Max:%.2f", Z_FADE_MIN_VALUE, Z_FADE_MAX_VALUE);
+        float val = numPadFloat((u8 *) tempstr, getParameter(P_ABL_STATE, 1), 0.0f, false);
+        storeCmd("M420 Z%.2f\n", NOBEYOND(Z_FADE_MIN_VALUE, val, Z_FADE_MAX_VALUE));
+        menuDrawPage(&bedLevelingItems);
         break;
+      }
 
       case KEY_ICON_6:
         if (getParameter(P_ABL_STATE, 0) == ENABLED)
-        {
           storeCmd("M420 S0\n");
-        }
         else
-        {
           storeCmd("M420 S1\n");
-        }
         break;
 
       case KEY_ICON_7:
@@ -120,7 +119,7 @@ void menuBedLeveling(void)
     {
       levelStateOld = getParameter(P_ABL_STATE, 0);
       blUpdateState(&bedLevelingItems);
-    };
+    }
 
     loopProcess();
   }
