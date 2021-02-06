@@ -24,6 +24,12 @@ void extrudeCoordinateReDraw(bool skip_header)
   setLargeFont(false);
 }
 
+// set the hotend to the minimum extrusion temperature if user selected "OK"
+void extrusionMinTemp_OK(void)
+{
+  heatSetTargetTemp(curExtruder_index, infoSettings.min_ext_temp);
+}
+
 void menuExtrude(void)
 {
   KEY_VALUES key_num = KEY_IDLE;
@@ -35,16 +41,19 @@ void menuExtrude(void)
   MENUITEMS extrudeItems = {
     // title
     LABEL_EXTRUDE,
-    // icon                      label
-    {{ICON_UNLOAD,               LABEL_UNLOAD},
-     {ICON_BACKGROUND,           LABEL_BACKGROUND},
-     {ICON_BACKGROUND,           LABEL_BACKGROUND},
-     {ICON_LOAD,                 LABEL_LOAD},
-     {ICON_NOZZLE,               LABEL_NOZZLE},
-     {ICON_E_5_MM,               LABEL_5_MM},
-     {ICON_NORMAL_SPEED,         LABEL_NORMAL_SPEED},
-     {ICON_BACK,                 LABEL_BACK},}
+    // icon                         label
+    {{ICON_UNLOAD,                  LABEL_UNLOAD},
+     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_LOAD,                    LABEL_LOAD},
+     {ICON_BACKGROUND,              LABEL_BACKGROUND},
+     {ICON_E_5_MM,                  LABEL_5_MM},
+     {ICON_NORMAL_SPEED,            LABEL_NORMAL},
+     {ICON_BACK,                    LABEL_BACK},}
   };
+
+  extrudeItems.items[KEY_ICON_4].icon = (infoSettings.ext_count > 1) ? ICON_NOZZLE : ICON_HEAT;
+  extrudeItems.items[KEY_ICON_4].label.index = (infoSettings.ext_count > 1) ? LABEL_NOZZLE : LABEL_HEAT;
 
   while (infoCmd.count != 0)
   {
@@ -80,6 +89,7 @@ void menuExtrude(void)
         {
           char titlestr[30];
           sprintf(titlestr, "Min:%i | Max:%i", (extlenSteps[COUNT(extlenSteps) - 1]) * -1, extlenSteps[COUNT(extlenSteps) - 1]);
+
           float val = numPadFloat((u8 *) titlestr, 0, 0, true);
           eTemp += val;
 
@@ -93,8 +103,15 @@ void menuExtrude(void)
         break;
 
       case KEY_ICON_4:
-        curExtruder_index = (curExtruder_index + 1) % infoSettings.ext_count;
-        extrudeCoordinateReDraw(false);
+        if (infoSettings.ext_count > 1)
+        {
+          curExtruder_index = (curExtruder_index + 1) % infoSettings.ext_count;
+          extrudeCoordinateReDraw(false);
+        }
+        else
+        {
+          infoMenu.menu[++infoMenu.cur] = menuHeat;
+        }
         break;
 
       case KEY_ICON_5:
@@ -110,6 +127,18 @@ void menuExtrude(void)
         break;
 
       case KEY_ICON_7:
+        if (!isPrinting())
+        {
+          for (uint8_t i = 0; i < infoSettings.hotend_count; i++)
+          {
+            if (heatGetTargetTemp(i) > 0)
+            {
+              setDialogText(LABEL_WARNING, LABEL_HEATERS_ON, LABEL_CONFIRM, LABEL_CANCEL);
+              showDialog(DIALOG_TYPE_QUESTION, heatCoolDown, NULL, NULL);
+              break;
+            }
+          }
+        }
         infoMenu.cur--;
         break;
 
@@ -129,11 +158,15 @@ void menuExtrude(void)
         storeCmd("%s\n", tool_change[curExtruder_index]);
 
       if (heatGetCurrentTemp(curExtruder_index) < infoSettings.min_ext_temp)
-      {
+      { // low temperature warning
         char tempMsg[120];
         LABELCHAR(tempStr, LABEL_EXT_TEMPLOW);
         sprintf(tempMsg, tempStr, infoSettings.min_ext_temp);
-        popupReminder(DIALOG_TYPE_ERROR, LABEL_COLD_EXT, (u8 *)tempMsg);
+        strcat(tempMsg, "\n");
+        sprintf(tempStr, (char *)textSelect(LABEL_HEAT_HOTEND), infoSettings.min_ext_temp);
+        strcat(tempMsg, tempStr);
+        setDialogText(LABEL_WARNING, (uint8_t *)tempMsg, LABEL_CONFIRM, LABEL_CANCEL);
+        showDialog(DIALOG_TYPE_ERROR, extrusionMinTemp_OK, NULL, NULL);
       }
       else
       {

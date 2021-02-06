@@ -28,13 +28,13 @@ typedef enum
 
 // Config version support
 // change if new elements/keywords are added/removed/changed in the configuration.h Format YYYYMMDD
-// this number should match the CONFIG_VERSION in configuration.h
-#define CONFIG_SUPPPORT 20201218
+// this number should match CONFIG_VERSION in configuration.h
+#define CONFIG_SUPPPORT 20210124
 
 #define FONT_FLASH_SIGN       20200908 //(YYYYMMDD) change if fonts require updating
-#define CONFIG_FLASH_SIGN     20201221 //(YYYYMMDD) change if any keyword(s) in config.ini is added or removed
-#define LANGUAGE_FLASH_SIGN   20201218 //(YYYYMMDD) change if any keyword(s) in language pack is added or removed
-#define ICON_FLASH_SIGN       20201028 //(YYYYMMDD) change if any icon(s) is added or removed
+#define CONFIG_FLASH_SIGN     20210130 //(YYYYMMDD) change if any keyword(s) in config.ini is added or removed
+#define LANGUAGE_FLASH_SIGN   20210130 //(YYYYMMDD) change if any keyword(s) in language pack is added or removed
+#define ICON_FLASH_SIGN       20210130 //(YYYYMMDD) change if any icon(s) is added or removed
 
 #define FONT_CHECK_SIGN       (FONT_FLASH_SIGN + WORD_UNICODE)
 #define CONFIG_CHECK_SIGN     (CONFIG_FLASH_SIGN + STRINGS_STORE_ADDR)
@@ -63,6 +63,8 @@ typedef enum
 #define DISABLED  0
 #define ENABLED   1
 #define AUTO      2
+#define HIGH      1
+#define LOW       0
 
 typedef enum
 {
@@ -79,7 +81,7 @@ typedef enum
 
 typedef struct
 {
-// General Settings
+  // General Settings
   uint8_t status_screen;
   uint8_t baudrate;
   uint8_t language;
@@ -111,7 +113,7 @@ typedef struct
   uint8_t  marlin_mode_fullscreen;
   uint8_t  marlin_type;
 
-// Printer / Machine Settings
+  // Printer / Machine Settings
   uint8_t  hotend_count;
   uint8_t  bed_en;
   uint8_t  chamber_en;
@@ -123,9 +125,11 @@ typedef struct
   uint8_t  fan_max[MAX_FAN_COUNT];
   int16_t  machine_size_min[AXIS_NUM];  // X, Y, Z
   int16_t  machine_size_max[AXIS_NUM];  // X, Y, Z
-  uint16_t axis_speed[SPEED_COUNT];
+  uint16_t xy_speed[SPEED_COUNT];
+  uint16_t z_speed[SPEED_COUNT];
   uint16_t ext_speed[SPEED_COUNT];
   uint8_t  auto_load_leveling;
+  uint8_t  touchmi_sensor;
   uint8_t  onboardSD;
   uint8_t  m27_refresh_time;
   uint8_t  m27_active;
@@ -145,36 +149,38 @@ typedef struct
 
   uint8_t  move_speed;  // index on infoSettings.axis_speed, infoSettings.ext_speed
 
-// Power Supply Settings
+  // Power Supply Settings
   uint8_t  auto_off;
   uint8_t  ps_active_high;
   uint8_t  auto_off_temp;
 
-// Filament Runout Settings
+  // Filament Runout Settings
   uint8_t  runout;
   uint8_t  runout_invert;
   uint16_t runout_noise_ms;
   uint8_t  runout_distance;
 
-// Power Loss Recovery & BTT UPS Settings
+  // Power Loss Recovery & BTT UPS Settings
   uint8_t  powerloss_en;
   uint8_t  powerloss_home;
   uint8_t  powerloss_invert;
   uint8_t  powerloss_z_raise;
   uint8_t  btt_ups;
 
-// Other device-specific settings
+  // Other Device-Specific Settings
   uint8_t  touchSound;
   uint8_t  toastSound;
   uint8_t  alertSound;
+  uint8_t  heaterSound;
   uint8_t  knob_led_color;
   uint8_t  knob_led_idle;
   uint8_t  lcd_brightness;
   uint8_t  lcd_idle_brightness;
   uint8_t  lcd_idle_timer;
   uint8_t  xy_offset_probing;
+  uint8_t  z_steppers_alignment;
 
-// Start, End & Cancel G-codes
+  // Start, End & Cancel Gcode Commands
   uint8_t  send_start_gcode;
   uint8_t  send_end_gcode;
   uint8_t  send_cancel_gcode;
@@ -212,9 +218,21 @@ typedef enum
   BL_MBL,  // Mesh Bed Leveling (MBL)
 } BL_TYPE;
 
+/**
+ * Firmware type
+ */
+typedef enum
+{
+  FW_NOT_DETECTED,
+  FW_MARLIN,
+  FW_REPRAPFW,
+  FW_KLIPPER,
+  FW_UNKNOWN,
+} FW_TYPE;
+
 typedef struct
 {
-  int8_t isMarlinFirmware;
+  FW_TYPE firmwareType;
   uint8_t EEPROM;
   uint8_t autoReportTemp;
   BL_TYPE leveling;
@@ -231,7 +249,6 @@ typedef struct
   uint8_t babyStepping;
   uint8_t softwareEndstops;
 } MACHINESETTINGS;
-
 
 extern SETTINGS infoSettings;
 extern MACHINESETTINGS infoMachineSettings;

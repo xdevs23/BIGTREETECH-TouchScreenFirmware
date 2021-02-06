@@ -15,6 +15,7 @@
 #include "delay.h"
 
 #include "boot.h"
+#include "ScreenShot.h"
 
 #include "Colors.h"
 #include "lcd.h"
@@ -109,7 +110,8 @@
 #include "MBL.h"
 #include "ABL.h"
 #include "BLTouch.h"
-#include "ProbeOffset.h"
+#include "Touchmi.h"
+#include "ZOffset.h"
 #include "PowerFailed.h"
 
 #include "UnifiedMove.h"

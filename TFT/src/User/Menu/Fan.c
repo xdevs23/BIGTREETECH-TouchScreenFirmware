@@ -4,9 +4,9 @@
 static uint8_t curIndex = 0;
 
 const ITEM itemFan[2] = {
-  // icon                        label
-  {ICON_FAN,                     LABEL_FAN},
-  {ICON_FAN_HALF_SPEED,          LABEL_FAN_HALF_SPEED},
+  // icon                label
+  {ICON_FAN,             LABEL_FAN},
+  {ICON_FAN_HALF_SPEED,  LABEL_HALF},
 };
 
 void fanSpeedReDraw(bool skip_header)
@@ -21,7 +21,8 @@ void fanSpeedReDraw(bool skip_header)
     if (infoSettings.fan_percentage == 1)
     {
       GUI_DispStringCenter((exhibitRect.x0 + exhibitRect.x1)>>1, exhibitRect.y0, (uint8_t *)"%");
-    }else
+    }
+    else
     {
       GUI_DispStringCenter((exhibitRect.x0 + exhibitRect.x1)>>1, exhibitRect.y0, (uint8_t *)"RAW");
     }
@@ -50,7 +51,7 @@ void menuFan(void)
      {ICON_BACKGROUND,              LABEL_BACKGROUND},
      {ICON_INC,                     LABEL_INC},
      {ICON_FAN ,                    LABEL_FAN},
-     {ICON_FAN_FULL_SPEED,          LABEL_FAN_FULL_SPEED},
+     {ICON_FAN_FULL_SPEED,          LABEL_FULL},
      {ICON_STOP,                    LABEL_STOP},
      {ICON_BACK,                    LABEL_BACK},}
   };

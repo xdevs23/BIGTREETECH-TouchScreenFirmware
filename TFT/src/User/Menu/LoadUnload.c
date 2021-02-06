@@ -32,9 +32,10 @@ void extruderIdReDraw(void)
   setLargeFont(false);
 }
 
-void setHotendMinExtTemp(void)  // set the hotend to the minimum extrusion temperature
+// set the hotend to the minimum extrusion temperature if user selected "OK"
+void loadMinTemp_OK(void)
 {
-  mustStoreCmd("M104 S%d T%d\n", infoSettings.min_ext_temp, curExt_index);
+  heatSetTargetTemp(curExt_index, infoSettings.min_ext_temp);
 }
 
 void menuLoadUnload(void)
@@ -49,7 +50,8 @@ void menuLoadUnload(void)
   {
     key_num = menuKeyGetValue();
 
-    if ((infoHost.wait == true) && (key_num != KEY_IDLE))  // if user pokes around while Load/Unload in progress
+    if (infoHost.wait == true && key_num != KEY_IDLE &&
+        key_num != KEY_ICON_7)  // show reminder for process running if presses any button other than bacnk button
     {
       if (lastcmd == UNLOAD)
       { // unloading
@@ -78,9 +80,9 @@ void menuLoadUnload(void)
           strcat(tempMsg, "\n");
           sprintf(tempStr, (char *)textSelect(LABEL_HEAT_HOTEND), infoSettings.min_ext_temp);
           strcat(tempMsg, tempStr);
+
           setDialogText(LABEL_WARNING, (uint8_t *)tempMsg, LABEL_CONFIRM, LABEL_CANCEL);
-          showDialog(DIALOG_TYPE_ERROR, setHotendMinExtTemp, NULL, NULL);
-          // popupReminder(DIALOG_TYPE_ERROR, LABEL_COLD_EXT, (u8 *)tempMsg);
+          showDialog(DIALOG_TYPE_ERROR, loadMinTemp_OK, NULL, NULL);
         }
         else if (key_num == KEY_ICON_0)
         { // unload
@@ -103,7 +105,7 @@ void menuLoadUnload(void)
       case KEY_ICON_5:
         infoMenu.menu[++infoMenu.cur] = menuHeat;
         lastcmd = NONE;
-      break;
+        break;
 
       case KEY_ICON_6:
         heatCoolDown();
@@ -111,18 +113,21 @@ void menuLoadUnload(void)
         break;
 
       case KEY_ICON_7:
-        for (uint8_t i = 0; i < infoSettings.hotend_count; i++)
+        if (!isPrinting())
         {
-          if (heatGetTargetTemp(i) > 0)
+          for (uint8_t i = 0; i < infoSettings.hotend_count; i++)
           {
-            setDialogText(LABEL_WARNING, LABEL_HEATERS_ON, LABEL_CONFIRM, LABEL_CANCEL);
-            showDialog(DIALOG_TYPE_QUESTION, heatCoolDown, NULL, NULL);
-            break;
+            if (heatGetTargetTemp(i) > 0)
+            {
+              setDialogText(LABEL_WARNING, LABEL_HEATERS_ON, LABEL_CONFIRM, LABEL_CANCEL);
+              showDialog(DIALOG_TYPE_QUESTION, heatCoolDown, NULL, NULL);
+              break;
+            }
           }
         }
         infoMenu.cur--;
         lastcmd = NONE;
-      break;
+        break;
 
       default:
         extruderIdReDraw();

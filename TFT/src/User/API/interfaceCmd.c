@@ -2,11 +2,9 @@
 #include "includes.h"
 
 
-GCODE_QUEUE infoCmd;       //
+GCODE_QUEUE infoCmd;
 GCODE_QUEUE infoCacheCmd;  // Only when heatHasWaiting() is false the cmd in this cache will move to infoCmd queue.
-
-static u8 cmd_index=0;
-
+static u8 cmd_index = 0;
 static bool ispolling = true;
 
 // Is there a code character in the current gcode command.
@@ -83,7 +81,7 @@ void mustStoreCmd(const char * format,...)
 
   GCODE_QUEUE *pQueue = &infoCmd;
 
-  if(pQueue->count >= CMD_MAX_LIST)
+  if (pQueue->count >= CMD_MAX_LIST)
     reminderMessage(LABEL_BUSY, STATUS_BUSY);
 
   while (pQueue->count >= CMD_MAX_LIST)
@@ -207,7 +205,7 @@ void sendQueueCmd(void)
   //check if cmd is from TFT or other host
   bool fromTFT = (infoCmd.queue[infoCmd.index_r].src == SERIAL_PORT);
 
-  if (!ispolling && !fromTFT)
+  if (!ispolling && fromTFT)
   { //ignore any query from TFT
     purgeLastCmd();
     return;
@@ -273,12 +271,12 @@ void sendQueueCmd(void)
                 Serial_Puts(SERIAL_PORT_2, "Begin file list\n");
                 if (mountFS() == true && scanPrintFiles() == true)
                 {
-                  for (uint16_t i = 0; i < infoFile.f_num; i++)
+                  for (uint16_t i = 0; i < infoFile.fileCount; i++)
                   {
                     Serial_Puts(SERIAL_PORT_2, infoFile.file[i]);
                     Serial_Puts(SERIAL_PORT_2, "\n");
                   }
-                  for (uint16_t i = 0; i < infoFile.F_num; i++)
+                  for (uint16_t i = 0; i < infoFile.folderCount; i++)
                   {
                     Serial_Puts(SERIAL_PORT_2, "/");
                     Serial_Puts(SERIAL_PORT_2, infoFile.folder[i]);
@@ -385,12 +383,12 @@ void sendQueueCmd(void)
                   Serial_Puts(SERIAL_PORT_2, infoFile.title);
                   Serial_Puts(SERIAL_PORT_2, ".\n");
                 }
-                  char buf[55];
-                  sprintf(buf, "%s printing byte %d/%d\n",(infoFile.source==TFT_SD)?"TFT SD":"TFT USB", getPrintCur(),getPrintSize());
-                  Serial_Puts(SERIAL_PORT_2, buf);
-                  Serial_Puts(SERIAL_PORT_2, "ok\n");
-                  purgeLastCmd();
-                  return;
+                char buf[55];
+                sprintf(buf, "%s printing byte %d/%d\n",(infoFile.source==TFT_SD)?"TFT SD":"TFT USB", getPrintCur(),getPrintSize());
+                Serial_Puts(SERIAL_PORT_2, buf);
+                Serial_Puts(SERIAL_PORT_2, "ok\n");
+                purgeLastCmd();
+                return;
               }
             }
             else
@@ -452,38 +450,51 @@ void sendQueueCmd(void)
 
           case 115: //M115 TFT
             if (!fromTFT && startsWith("M115 TFT", infoCmd.queue[infoCmd.index_r].gcode))
+            {
+              char buf[50];
+              Serial_Puts(SERIAL_PORT_2,
+                          "FIRMWARE_NAME: " FIRMWARE_NAME
+                          " SOURCE_CODE_URL:https://github.com/bigtreetech/BIGTREETECH-TouchScreenFirmware\n");
+              sprintf(buf, "Cap:HOTEND_NUM:%d\n", infoSettings.hotend_count);
+              Serial_Puts(SERIAL_PORT_2, buf);
+              sprintf(buf, "Cap:EXTRUDER_NUM:%d\n", infoSettings.ext_count);
+              Serial_Puts(SERIAL_PORT_2, buf);
+              sprintf(buf, "Cap:FAN_NUM:%d\n", infoSettings.fan_count);
+              Serial_Puts(SERIAL_PORT_2, buf);
+              sprintf(buf, "Cap:FAN_CTRL_NUM:%d\n", infoSettings.fan_ctrl_count);
+              Serial_Puts(SERIAL_PORT_2, buf);
+              Serial_Puts(SERIAL_PORT_2, "ok\n");
+              purgeLastCmd();
+              return;
+            }
+            break;
+
+          case 125: //M125
+            if (!fromTFT)
+            {
+              if (isPrinting() && !infoHost.printing)
               {
-                char buf[50];
-                Serial_Puts(SERIAL_PORT_2,
-                            "FIRMWARE_NAME: " FIRMWARE_NAME
-                            " SOURCE_CODE_URL:https://github.com/bigtreetech/BIGTREETECH-TouchScreenFirmware\n");
-                sprintf(buf, "Cap:HOTEND_NUM:%d\n", infoSettings.hotend_count);
-                Serial_Puts(SERIAL_PORT_2, buf);
-                sprintf(buf, "Cap:EXTRUDER_NUM:%d\n", infoSettings.ext_count);
-                Serial_Puts(SERIAL_PORT_2, buf);
-                sprintf(buf, "Cap:FAN_NUM:%d\n", infoSettings.fan_count);
-                Serial_Puts(SERIAL_PORT_2, buf);
-                sprintf(buf, "Cap:FAN_CTRL_NUM:%d\n", infoSettings.fan_ctrl_count);
-                Serial_Puts(SERIAL_PORT_2, buf);
+                setPrintPause(true, false);
                 Serial_Puts(SERIAL_PORT_2, "ok\n");
                 purgeLastCmd();
                 return;
               }
+            }
             break;
 
           case 524: //M524
             if (!fromTFT && isPrinting() && !infoHost.printing)
-              {
-                abortPrinting();
-                Serial_Puts(SERIAL_PORT_2, "ok\n");
-                purgeLastCmd();
-                return;
-              }
+            {
+              abortPrinting();
+              Serial_Puts(SERIAL_PORT_2, "ok\n");
+              purgeLastCmd();
+              return;
+            }
             break;
         #else // SERIAL_PORT_2
           case 27: //M27
-              printSetUpdateWaiting(false);
-          break;
+            printSetUpdateWaiting(false);
+            break;
         #endif //SERIAL_PORT_2
 
         case 80: //M80

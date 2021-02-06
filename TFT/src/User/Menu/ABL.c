@@ -23,8 +23,8 @@ void ablUpdateStatus(bool succeeded)
     }
     case BL_UBL:
     {
-      tempTitle.index = LABEL_ABL_SETTINGS_UBL;
       savingEnabled = false;
+      tempTitle.index = LABEL_ABL_SETTINGS_UBL;
 
       sprintf(&tempMsg[strlen(tempMsg)], "\n %s", textSelect(LABEL_BL_SMART_FILL));
       break;
@@ -165,6 +165,12 @@ void menuABL(void)
 
   KEY_VALUES key_num = KEY_IDLE;
 
+  if (infoSettings.touchmi_sensor != 0)
+  {
+    autoLevelingItems.items[4].icon = ICON_NOZZLE;
+    autoLevelingItems.items[4].label.index = LABEL_TOUCHMI;
+  }
+
   switch (infoMachineSettings.leveling)
   {
     case BL_BBL:
@@ -202,6 +208,9 @@ void menuABL(void)
 
           case BL_UBL:  // if Unified Bed Leveling
             storeCmd("G29 P1\n");
+            // Run this multiple times since it only fills some missing points, not all.
+            storeCmd("G29 P3\n");
+            storeCmd("G29 P3\n");
             storeCmd("G29 P3\n");
             storeCmd("M118 A1 UBL Complete\n");
             break;
@@ -224,7 +233,10 @@ void menuABL(void)
         break;
 
       case KEY_ICON_4:
-        infoMenu.menu[++infoMenu.cur] = menuBLTouch;
+        if (infoSettings.touchmi_sensor != 0)
+          infoMenu.menu[++infoMenu.cur] = menuTouchMi;
+        else
+          infoMenu.menu[++infoMenu.cur] = menuBLTouch;
         break;
 
       case KEY_ICON_6:
