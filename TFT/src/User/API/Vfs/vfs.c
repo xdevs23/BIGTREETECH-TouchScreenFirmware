@@ -3,6 +3,16 @@
 
 MYFILE infoFile = {"?:", {0}, {0}, 0, 0, 0, 0, TFT_SD, {0}};
 
+void setPrintModelIcon(bool exist)
+{
+  infoFile.model_icon = exist;
+}
+
+bool isPrintModelIcon(void)
+{
+  return infoFile.model_icon;
+}
+
 bool mountFS(void)
 {
   //  resetInfoFile();  //needn't this
@@ -121,7 +131,7 @@ bool IsRootDir(void)
 // Volume exist detect
 static bool volumeSrcStatus[FF_VOLUMES] = {false, false};
 
-bool isVolumeExist(u8 src)
+bool isVolumeExist(uint8_t src)
 {
   if (src >= FF_VOLUMES)
     return true;
@@ -132,7 +142,7 @@ uint8_t (*volumeInserted[FF_VOLUMES])(void) = {SD_CD_Inserted, USBH_USR_Inserted
 
 void loopVolumeSource(void)
 {
-  for (u8 i = 0; i < FF_VOLUMES; i++)
+  for (uint8_t i = 0; i < FF_VOLUMES; i++)
   {
     if (volumeSrcStatus[i] != (*volumeInserted[i])())
     {
